@@ -2,20 +2,28 @@ import sys
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 
-def find_players(match_link):
-    
+def find_players(match_link, option):
     link = urlopen(match_link)
     soup = BeautifulSoup(link.read(), "html.parser")
-    print("Match page accessed...")
+    print("Page accessed...")
     
-    #Parsing html for player IDs
-    rows = soup.find(id ='content').find_all('p')
-    del rows[0]
-
+    if option == 0: 
+        #Parsing html for player IDs from match page
+        rows = soup.find(id ='content').find_all('p')
+        del rows[0]
+               
+    else:
+        #Parsing html for player IDs from team page
+        rows = soup.find(id = 'content').find_all("td", {"class" : "text-break"})
+        
     #Cleaning up the names. I could probably have used regex when finding them but was too lazy
     for i in range(len(rows)):
-        rows[i] = rows[i].get_text().replace('#', '-').strip()
+        rows[i] = rows[i].get_text().replace('#', '-').strip() 
+    
     return(rows)
+
+
+
 
 
 
@@ -44,6 +52,7 @@ def find_sr (rows):
             sys.stdout.write(rows[i])
             print()
 
+link_type = input("0 if match page, 1 if team page: ")
 link = input("Paste match link below:\n")
-players = find_players(link)
+players = find_players(link, link_type)
 find_sr(players)
