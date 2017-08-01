@@ -56,5 +56,6 @@ try:
     link = input("Paste link below:\n")
     players = find_players(link = link, option = link_type)
     find_sr(players)
+    print("Done")
 except:
     print("Something broke!")
