@@ -2,8 +2,8 @@ import sys
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 
-def find_players(match_link, option):
-    link = urlopen(match_link)
+def find_players(link, option):
+    link = urlopen(link)
     soup = BeautifulSoup(link.read(), "html.parser")
     print("Page accessed...")
     
@@ -51,8 +51,10 @@ def find_sr (rows):
             sys.stdout.write('https://playoverwatch.com/en-us/career/pc/us/')
             sys.stdout.write(rows[i])
             print()
-
-link_type = input("0 if match page, 1 if team page: ")
-link = input("Paste match link below:\n")
-players = find_players(link, link_type)
-find_sr(players)
+try:
+    link_type = int(input("0 if match page, 1 if team page: "))
+    link = input("Paste link below:\n")
+    players = find_players(link = link, option = link_type)
+    find_sr(players)
+except:
+    print("Something broke!")
