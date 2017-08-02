@@ -71,10 +71,10 @@ def find_mains(tag):
             
 
 option = int(input("0 if match page, 1 if team page, 2 if tag: "))
-if link_type <2:
+if option <2:
     link = input("Paste link below:\n")
     players = find_players(link = link, option = option)
-    for i in len(players):
+    for i in range(players):
         sr = find_sr(players[i])
         mains = find_mains(players[i])
         print(players[i], ':', sr, 'Mains: ' , mains)
