@@ -43,8 +43,7 @@ def find_sr (tag):
         sr = str(sr)    
         sr = sr.replace('<div class="u-align-center h6">', '').replace('</div>', '')
     except:
-        sr = str('Can\'t open link. Check out https://playoverwatch.com/en-us/career/pc/us/', rows[i])
-    
+        sr = ""
     return(sr)
 
 def find_mains(tag):
@@ -64,7 +63,8 @@ def find_mains(tag):
         mains = main_list[0:3]
         
     except:
-        mains = str('Can\'t open link. Check out https://playoverwatch.com/en-us/career/pc/us/', rows[i])    
+        mains = link
+        mains +=' Check it yourself, \'cuz I can\'t'
     return(mains)
     
  
@@ -74,10 +74,10 @@ option = int(input("0 if match page, 1 if team page, 2 if tag: "))
 if option <2:
     link = input("Paste link below:\n")
     players = find_players(link = link, option = option)
-    for i in range(players):
-        sr = find_sr(players[i])
-        mains = find_mains(players[i])
-        print(players[i], ':', sr, 'Mains: ' , mains)
+    for player in players:
+        sr = find_sr(player)
+        mains = find_mains(player)
+        print(player, ':', sr, 'Mains: ' , mains)
 else:
     print("Paste tag below, make sure caps are accounted for.")
     tag = input("Make sure it follows the format @@@@@@@@-#####\n")
