@@ -27,35 +27,60 @@ def find_players(link, option):
 
 
 
-def find_sr (rows):    
+def find_sr (tag):    
     #Setting up links to profiles
+    
+    
     profile = 'https://playoverwatch.com/en-us/career/pc/us/{}'
-    links = [profile.format(tags)
-             for tags in rows]  
+    link = profile.format(tag)
 
-    players = []
 
     #Open links to profiles and extract SRs
-    for i, link in enumerate(links):
-        try:
-            players.append(1)
-            players[i] = urlopen(link)
-            soup = BeautifulSoup(players[i].read(), "html.parser")
-            sr = soup.find("div", {"class" : "u-align-center h6"})
-            sr = str(sr)    
-            sr = sr.replace('<div class="u-align-center h6">', '').replace('</div>', '')
-            print(rows[i], ':' , sr)
-        except:
-            sys.stdout.write(rows[i])
-            sys.stdout.write('\'s name has weird characters. Look it up here:\n')
-            sys.stdout.write('https://playoverwatch.com/en-us/career/pc/us/')
-            sys.stdout.write(rows[i])
-            print()
-try:
-    link_type = int(input("0 if match page, 1 if team page: "))
+    try:
+        site = urlopen(link)
+        soup = BeautifulSoup(site.read(), "html.parser")
+        sr = soup.find("div", {"class" : "u-align-center h6"})
+        sr = str(sr)    
+        sr = sr.replace('<div class="u-align-center h6">', '').replace('</div>', '')
+    except:
+        sr = str('Can\'t open link. Check out https://playoverwatch.com/en-us/career/pc/us/', rows[i])
+    
+    return(sr)
+
+def find_mains(tag):
+    #Setting up links to profiles
+    profile = 'https://playoverwatch.com/en-us/career/pc/us/{}'
+    link = profile.format(tag)
+
+    #Open links to profiles and extract SRs:
+    try:
+        site = urlopen(link)
+        soup = BeautifulSoup(site.read(), "html.parser")
+        soup = soup.find(id = "competitive")
+        main_list = soup.find_all("div", {"class" : "title"})
+        main_list[0] = main_list[0].text.strip()
+        main_list[1] = main_list[1].text.strip()
+        main_list[2] = main_list[2].text.strip()
+        mains = main_list[0:3]
+        
+    except:
+        mains = str('Can\'t open link. Check out https://playoverwatch.com/en-us/career/pc/us/', rows[i])    
+    return(mains)
+    
+ 
+            
+
+option = int(input("0 if match page, 1 if team page, 2 if tag: "))
+if link_type <2:
     link = input("Paste link below:\n")
-    players = find_players(link = link, option = link_type)
-    find_sr(players)
-    print("Done")
-except:
-    print("Something broke!")
+    players = find_players(link = link, option = option)
+    for i in len(players):
+        sr = find_sr(players[i])
+        mains = find_mains(players[i])
+        print(players[i], ':', sr, 'Mains: ' , mains)
+else:
+    print("Paste tag below, make sure caps are accounted for.")
+    tag = input("Make sure it follows the format @@@@@@@@-#####\n")
+    sr = find_sr(tag)
+    mains = find_mains(tag)
+    print('SR :', sr, '. Mains: ', mains)
