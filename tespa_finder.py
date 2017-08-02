@@ -77,7 +77,7 @@ if option <2:
     for player in players:
         sr = find_sr(player)
         mains = find_mains(player)
-        print(player, ':', sr, 'Mains: ' , mains)
+        print(player, ':', sr, '. Mains: ' , mains)
 else:
     print("Paste tag below, make sure caps are accounted for.")
     tag = input("Make sure it follows the format @@@@@@@@-#####\n")
