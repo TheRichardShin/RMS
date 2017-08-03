@@ -1,7 +1,6 @@
 import sys
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
-import numpy as np
 
 def open_and_read(link):
     link = urlopen(link)
@@ -88,7 +87,7 @@ def display(soup, team_no):
     srs = [avg if x == 0 else x for x in srs]
     print("Placeholder sr: ", avg)
     print("Effective sr: " , srs)
-    print("Average sr: " , np.mean(srs))
+    print("Average sr: " , avg , " (should be same as placeholder)")
     return()
 
 def find_imp_avg(srs):
