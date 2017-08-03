@@ -3,11 +3,13 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import numpy as np
 
-
-# the _1 refers to the option chosen, not players on team 1
-def find_players_1(link):
+def open_and_read(link):
     link = urlopen(link)
-    soup = BeautifulSoup(link.read(), "html.parser")
+    soup = BeautifulSoup(link.read(),"html.parser")
+    return(soup)
+    
+# the _1 refers to the option chosen, not players on team 1
+def find_players_1(soup):
     
     #Parsing html for player IDs from team page
     rows = soup.find(id = 'content').find_all("td", {"class" : "text-break"})
@@ -18,113 +20,109 @@ def find_players_1(link):
     
     return(rows)
 
-def find_team_1(link):
+def find_team_1(soup):
     #find team name on page
-    link = urlopen(link)
-    soup = BeautifulSoup(link.read(), "html.parser")
     name = soup.find("span", {"class" : "hgd-em"})    
     name = name.get_text().strip()
     return(name)
 
-def find_players_0a(link):
-    link = urlopen(link)
-    soup = BeautifulSoup(link.read(), "html.parser")
+def find_players_0(soup, team):
+    if team == 0:
+        #Parsing html for player IDs from match page
+        rows = soup.find(id ='content').find("div", {"class" : "col-xs-5 match-players"}).find_all('p')
+    elif team == 1:
+        rows = soup.find(id ='content').find("div", {"class" : "col-xs-5 col-xs-offset-2 match-players text-right"}).find_all('p')
     
-    #Parsing html for player IDs from match page
-    rows = soup.find(id ='content').find("div", {"class" : "col-xs-5 match-players"}).find_all('p')
     for i in range(len(rows)):
         rows[i] = rows[i].get_text().replace('#', '-').strip() 
-    return(rows)    
-
-def find_players_0b(link):    
-    link = urlopen(link)
-    soup = BeautifulSoup(link.read(), "html.parser")
     
-    #Parsing html for player IDs from match page
-    rows = soup.find(id ='content').find("div", {"class" : "col-xs-5 col-xs-offset-2 match-players text-right"}).find_all('p')
-    for i in range(len(rows)):
-        rows[i] = rows[i].get_text().replace('#', '-').strip() 
     return(rows)    
 
 
-def find_team_0(link):
+def find_team_0(soup):
     #find team names from match page
     names = ["", ""]
-    link = urlopen(link)
-    soup = BeautifulSoup(link.read(), "html.parser")
     names[0] = soup.find(id="player1Container").get_text().strip()
     names[1] = soup.find(id="player2Container").get_text().strip()
     return(names)
 
 
-def find_sr (tag):    
+def find_sr_main (tag):    
     #Setting up links to profiles
     profile = 'https://playoverwatch.com/en-us/career/pc/us/{}'
     link = profile.format(tag)
 
     #Open links to profiles and extract SRs
     try:
-        site = urlopen(link)
-        soup = BeautifulSoup(site.read(), "html.parser")
-        sr = soup.find("div", {"class" : "u-align-center h6"})
+        link = open_and_read(link)
+        sr = link.find("div", {"class" : "u-align-center h6"})
         sr = str(sr)    
         sr = sr.replace('<div class="u-align-center h6">', '').replace('</div>', '')
-    except:
-        sr = ""
-    return(sr)
-
-def find_mains(tag):
-    #Setting up links to profiles
-    profile = 'https://playoverwatch.com/en-us/career/pc/us/{}'
-    link = profile.format(tag)
-
-    #Open links to profiles and extract mains:
-    try:
-        site = urlopen(link)
-        soup = BeautifulSoup(site.read(), "html.parser")
-        soup = soup.find(id = "competitive")
+        soup = link.find(id = "competitive")
         main_list = soup.find_all("div", {"class" : "title"})
+        #find top 3 most played
         main_list[0] = main_list[0].text.strip()
         main_list[1] = main_list[1].text.strip()
         main_list[2] = main_list[2].text.strip()
-        mains = main_list[0:3]
-        
+        mains = main_list[0:3]        
     except:
-        mains = link
-        mains +=' Check it yourself, \'cuz I can\'t'
-    return(mains)
+        sr = "None"
+        mains = []
+    return(sr, mains)
+
+
+def display(soup, team_no):
+    team_name = find_team_0(soup)
+    team = find_players_0(link, team_no)
+    print(team_name[team_no])
+    srs= []
+    for idx, player in enumerate(team):
+        sr = find_sr_main(player)
+        srs.append(1)
+        srs[idx] = sr[0]
+        print(player, ':', sr[0], '. Mains: ' , sr[1])
+    #Sub unplaced people with imputation
+    srs = [sr.replace('None', '0') for sr in srs]
+    srs = list(map(int,srs))    
+    avg = find_imp_avg(srs)
+    srs = [avg if x == 0 else x for x in srs]
+    print("Placeholder sr: ", avg)
+    print("Effective sr: " , srs)
+    print("Average sr: " , np.mean(srs))
+    return()
+
+def find_imp_avg(srs):
+    count = 0
+    total = 0
+    for i in srs:
+        if i != 0:
+            count += 1
+            total += i
+        else:
+            count = count
+    avg = total/count    
+    
+    return(avg)
+
+def find_hero_pool(team):
+    return(0)
+
+
+def find_winner(soup):
+    team1 = soup.find(id="team1_score")
+    team2 = soup.find(id="team2_score")
+    
+    
     
 #public static void main(String args[]){
 option = int(input("0 if match page, 1 if team page, 2 if tag: "))
-if option == 0:
-    link = input("Paste link below:\n")
-    teams = find_team_0(link)
-    team1 = find_players_0a(link)
-    team2 = find_players_0b(link)
-    print(teams[0])
-    srs1 = []
-    srs2 = []
-    for idx, player in enumerate(team1):
-        sr = find_sr(player)
-        srs1.append(1)
-        srs1[idx] = sr
-        mains = find_mains(player)
-        print(player, ':', sr, '. Mains: ' , mains)
-    #replace unranked people with 2500
-    srs1 = [sr.replace('None', '2500') for sr in srs1]
-    srs1 = list(map(int,srs1))
-    print("Average sr: " , np.mean(srs1))
 
-    print('\n', teams[1])
-    for idx, player in enumerate(team2):
-        sr = find_sr(player)
-        srs2.append(1)
-        srs2[idx] = sr
-        mains = find_mains(player)
-        print(player, ':', sr, '. Mains: ' , mains)
-    srs1 = [sr.replace('None', '2500') for sr in srs2]
-    srs2 = list(map(int,srs1))
-    print("Average sr: ",np.mean(srs2))
+if option == 0:
+    paste = input("Paste link below:\n")
+    link = open_and_read(paste)
+    display(link, 0)
+    display(link,1)
+    
 elif option == 1:
     link = input("Paste link below:\n")
     team = find_team_1(link)
@@ -132,21 +130,18 @@ elif option == 1:
     players = find_players_1(link = link)
     srs = []
     for player in players:
-        sr = find_sr(player)
+        sr = find_sr_main(player)
         srs.append(1)
-        srs[player] = sr
-        mains = find_mains(player)
-        print(player, ':', sr, '. Mains: ' , mains)
-    map(lambda x:0 if x=="None" else x,srs)
-    print(np.mean(srs))
+        srs[player] = sr[0]
+        print(player, ':', sr[0], '. Mains: ' , sr[1])
         
 elif option == 2:
     print("Paste tag below, make sure caps are accounted for.")
     tag = input("Make sure it follows the format @@@@@@@@-#####\n")
     tag = tag.replace('#', '-')
-    sr = find_sr(tag)
-    mains = find_mains(tag)
-    print('SR :', sr, '. Mains: ', mains)
+    sr = find_sr_main(tag)
+    print('SR :', sr[0], '. Mains: ', sr[1])
+    
 else:
     print("How could you mess that up?")
 #}
