@@ -109,9 +109,13 @@ def find_hero_pool(team):
 
 
 def find_winner(soup):
-    team1 = soup.find(id="team1_score")
-    team2 = soup.find(id="team2_score")
-    
+    try:
+        team1 = int(soup.find(id="team1_score")['value'])
+        team2 = int(soup.find(id="team2_score")['value'])
+        if (team1 + team2) > 0:
+            return(team1>team2)
+    except:
+        return("forfeit")
     
     
 #public static void main(String args[]){
@@ -122,7 +126,14 @@ if option == 0:
     link = open_and_read(paste)
     display(link, 0)
     display(link,1)
-    
+    result = find_winner(link)
+    try:
+        print("The winner was ", find_team_0(link)[1- result])
+    except:
+        print("This was a", result)
+        
+        
+        
 elif option == 1:
     link = input("Paste link below:\n")
     team = find_team_1(link)
